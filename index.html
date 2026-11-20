@@ -1,309 +1,469 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planilla de Control e Ingreso de Vehículos</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font: Inter & Courier Prime for paper/typewriter look -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #e2e8f0; /* Color escritorio/carpeta */
-            color: #0f172a;
-            touch-action: manipulation;
-        }
-        .font-paper-mono {
-            font-family: 'Courier Prime', monospace;
-        }
-        /* Estilo Hoja de Papel Física */
-        .paper-sheet {
-            background-color: #fdfbf7; /* Blanco crema cálido */
-            border: 2px solid #334155;
-            box-shadow: 4px 6px 15px rgba(0,0,0,0.15);
-        }
-        .paper-border {
-            border: 2px solid #334155;
-        }
-        .paper-border-dashed {
-            border: 2px dashed #64748b;
-        }
-        /* Líneas de renglón de cuaderno */
-        .notebook-line {
-            border-bottom: 1px solid #cbd5e1;
-        }
-        /* Resaltado tipo sello o marcador */
-        .stamp-badge {
-            border: 2px solid #0f172a;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control Rápido de Sellos</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --primary: #1a73e8;
+      --primary-dark: #1557b0;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      margin: 0 0 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge {
+      background: var(--primary);
+      color: white;
+      font-size: 0.85rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="tel"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    /* Sugerencias de placas */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .suggestion-btn {
+      background: #e8f0fe;
+      color: var(--primary-dark);
+      border: 1px solid #bfdbfe;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    .suggestion-btn:active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Sección de ingreso de sello (oculta hasta elegir placa) */
+    .sello-box {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .sello-box.active {
+      display: block;
+    }
+
+    .selected-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .selected-placa {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .btn-cancel {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .row-input {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-save {
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0 20px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Lista registrada */
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 1.05rem;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-info strong {
+      font-family: monospace;
+      font-size: 1.15rem;
+    }
+
+    .item-sello {
+      color: var(--primary-dark);
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .btn-del {
+      background: #fee2e2;
+      color: var(--danger);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Botones de acción inferiores */
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-copy {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-clear {
+      background: #e5e7eb;
+      color: var(--text);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col p-2 sm:p-4 md:p-6 text-slate-900 selection:bg-yellow-200">
+<body>
 
-    <!-- CONTENEDOR PRINCIPAL TIPO HOJA DE REGISTRO IMPRESA -->
-    <div class="max-w-5xl w-full mx-auto paper-sheet rounded-lg overflow-hidden flex flex-col my-auto">
+<div class="container">
+  <h1>
+    <span>Planilla Rápida</span>
+    <span class="badge" id="counter">0 vehículos</span>
+  </h1>
 
-        <!-- ENCABEZADO FISICO DE LA PLANILLA -->
-        <header class="bg-slate-800 text-white p-4 sm:p-5 border-b-4 border-slate-900">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="bg-white text-slate-900 p-3 rounded-md font-bold text-2xl border-2 border-slate-900 flex items-center justify-center">
-                        <i class="fa-solid fa-clipboard-list"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl sm:text-2xl font-black tracking-tight leading-tight uppercase font-paper-mono">HOJA DE REGISTRO Y CONTROL DE VEHÍCULOS</h1>
-                        <p class="text-xs sm:text-sm text-slate-300 font-semibold">Puesto de Control • Control de Sellos y Personal de Carga</p>
-                    </div>
-                </div>
+  <!-- Buscador y captura -->
+  <div class="card">
+    <label for="placaInput">1. Escribe las primeras letras de la placa:</label>
+    <input type="text" id="placaInput" placeholder="Ej: EQL, WEP, ZNN..." autocomplete="off" maxlength="6">
+    
+    <div class="suggestions" id="suggestionsBox"></div>
 
-                <div class="flex items-center gap-2 self-end sm:self-auto">
-                    <button onclick="app.openResetModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 border-2 border-slate-900 font-extrabold px-3 py-2 rounded text-xs sm:text-sm transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-arrows-rotate"></i> NUEVO TURNO
-                    </button>
-                </div>
-            </div>
-        </header>
+    <!-- Cuadro inmediato para sello -->
+    <div class="sello-box" id="selloBox">
+      <div class="selected-header">
+        <span class="selected-placa" id="selectedPlacaText">---</span>
+        <button class="btn-cancel" onclick="resetSearch()">Cambiar placa</button>
+      </div>
+      <label for="selloInput">2. Ingresa el sello (o estado):</label>
+      <div class="row-input">
+        <input type="text" id="selloInput" placeholder="Ej: 458920 o FALLA" autocomplete="off">
+        <button class="btn-save" onclick="guardarRegistro()">OK</button>
+      </div>
+    </div>
+  </div>
 
-        <!-- BARRA SUPERIOR DE DATOS DEL TURNO (ESTILO FORMULARIO IMPRESO) -->
-        <div class="bg-amber-50/80 p-3 sm:p-4 border-b-2 border-slate-700 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
-            
-            <!-- Fecha -->
-            <div class="bg-white p-2.5 rounded border-2 border-slate-700 flex items-center gap-2">
-                <i class="fa-regular fa-calendar text-slate-700 text-lg"></i>
-                <span class="text-xs font-bold uppercase text-slate-600">FECHA:</span>
-                <input type="date" id="shiftDate" onchange="app.updateShiftInfo()" class="font-bold text-base text-slate-900 bg-transparent focus:outline-none cursor-pointer w-full">
-            </div>
+  <!-- Lista en orden estricto de llegada -->
+  <div class="card">
+    <label>Orden de planilla (Esticto orden de registro):</label>
+    <div id="listaRegistros">
+      <p style="color: #9ca3af; font-size: 0.9rem; margin: 8px 0;">Aún no hay vehículos registrados en este turno.</p>
+    </div>
 
-            <!-- Selector de Turno -->
-            <div class="bg-white p-1.5 rounded border-2 border-slate-700 flex items-center justify-between">
-                <span class="text-xs font-bold uppercase text-slate-600 px-2">TURNO:</span>
-                <div class="flex items-center gap-1">
-                    <button id="btnShiftDay" onclick="app.setShift('Día')" class="px-3 py-1.5 font-black text-xs sm:text-sm rounded border-2 border-slate-800 transition">
-                        <i class="fa-solid fa-sun text-amber-500 mr-1"></i> DÍA
-                    </button>
-                    <button id="btnShiftNight" onclick="app.setShift('Noche')" class="px-3 py-1.5 font-black text-xs sm:text-sm rounded border-2 border-slate-800 transition">
-                        <i class="fa-solid fa-moon text-indigo-600 mr-1"></i> NOCHE
-                    </button>
-                </div>
-            </div>
+    <div class="actions">
+      <button class="btn-action btn-copy" onclick="copiarPlanilla()">Copiar para Keep / WhatsApp</button>
+      <button class="btn-action btn-clear" onclick="limpiarTodo()">Limpiar Turno</button>
+    </div>
+  </div>
+</div>
 
-            <!-- Resumen de Contadores -->
-            <div class="flex items-center justify-around bg-white p-2 rounded border-2 border-slate-700">
-                <div class="text-center">
-                    <span class="text-[11px] font-bold uppercase text-slate-500 block">TOTAL VEHÍCULOS</span>
-                    <span id="statTotalCount" class="text-xl font-black text-slate-900 font-paper-mono">0</span>
-                </div>
-                <div class="h-8 w-0.5 bg-slate-300"></div>
-                <div class="text-center">
-                    <span class="text-[11px] font-bold uppercase text-amber-700 block">NOVEDADES / SIN SELLO</span>
-                    <span id="statNoveltyCount" class="text-xl font-black text-amber-600 font-paper-mono">0</span>
-                </div>
-            </div>
+<div class="toast" id="toast">Copiado al portapapeles</div>
+
+<script>
+  // Base de datos con tus 71 placas precargadas
+  const BASE_PLACAS = [
+    "EQL359", "EQM481", "EQM482", "EQM483", "EQM485", "EQM486", "EQM487", "EQM489",
+    "EQM490", "EQM492", "EQM493", "EQM495", "EQM496", "EQM497", "EQM498", "EQM499",
+    "EQM500", "EQM501", "EQM502", "EQM503", "EQM504", "EQM505", "EQM506", "EQM507",
+    "EQM508", "EQM509", "EQM510", "EQM511", "EQM512", "EQM513", "EQM514", "EQM515",
+    "EQM516", "EQM517", "EQM518", "EQM519", "EQM520", "EQM521", "EQM522", "EQM523",
+    "EQM524", "EQM525", "EQM526", "EQM527", "EQM528", "EQM529", "EQM530", "EQM531",
+    "EQM532", "EQM533", "EQM534", "EQM535", "EQM536", "EQM537", "EQM538", "EQM539",
+    "EQM540", "EQM541", "EQM542", "EQM543", "EQM544", "EQM545", "WEP114", "WEP115",
+    "WEP116", "WEP117", "WEP118", "WEP119", "WEP120", "ZNN822", "ZNN823"
+  ];
+
+  let placaSeleccionada = "";
+  let registros = JSON.parse(localStorage.getItem("planilla_sellos_v1")) || [];
+
+  const placaInput = document.getElementById("placaInput");
+  const suggestionsBox = document.getElementById("suggestionsBox");
+  const selloBox = document.getElementById("selloBox");
+  const selectedPlacaText = document.getElementById("selectedPlacaText");
+  const selloInput = document.getElementById("selloInput");
+  const listaRegistros = document.getElementById("listaRegistros");
+  const counter = document.getElementById("counter");
+
+  // Renderizar lista inicial
+  renderLista();
+
+  // Escuchar escritura en placa
+  placaInput.addEventListener("input", () => {
+    const query = placaInput.value.trim().toUpperCase();
+    suggestionsBox.innerHTML = "";
+    selloBox.classList.remove("active");
+
+    if (query.length < 2) return; // Muestra sugerencias desde 2 o 3 letras
+
+    const coincidencias = BASE_PLACAS.filter(p => p.startsWith(query));
+
+    // Mostrar botones con coincidencias
+    coincidencias.slice(0, 12).forEach(placa => {
+      const btn = document.createElement("button");
+      btn.className = "suggestion-btn";
+      btn.textContent = placa;
+      btn.onclick = () => seleccionarPlaca(placa);
+      suggestionsBox.appendChild(btn);
+    });
+
+    // Opción por si llega un vehículo nuevo que no esté en las 71 placas
+    if (query.length === 6 && !BASE_PLACAS.includes(query)) {
+      const btnNueva = document.createElement("button");
+      btnNueva.className = "suggestion-btn";
+      btnNueva.style.background = "#fef3c7";
+      btnNueva.style.color = "#92400e";
+      btnNueva.textContent = `+ Usar "${query}"`;
+      btnNueva.onclick = () => seleccionarPlaca(query);
+      suggestionsBox.appendChild(btnNueva);
+    }
+  });
+
+  // Seleccionar placa y saltar directo al campo de sello
+  function seleccionarPlaca(placa) {
+    placaSeleccionada = placa;
+    selectedPlacaText.textContent = placa;
+    suggestionsBox.innerHTML = "";
+    placaInput.value = placa;
+    selloBox.classList.add("active");
+    selloInput.value = "";
+    selloInput.focus(); // Abre el teclado inmediatamente en el sello
+  }
+
+  // Permitir guardar con la tecla Enter / Ir del teclado del celular
+  selloInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      guardarRegistro();
+    }
+  });
+
+  function guardarRegistro() {
+    const sello = selloInput.value.trim().toUpperCase();
+    if (!placaSeleccionada) return;
+    if (!sello) {
+      selloInput.focus();
+      return;
+    }
+
+    // Agregar al final para mantener el orden físico estricto
+    registros.push({
+      placa: placaSeleccionada,
+      sello: sello
+    });
+
+    guardarEnMemoria();
+    renderLista();
+    resetSearch();
+    mostrarToast(`Guardado: ${placaSeleccionada}`);
+  }
+
+  function resetSearch() {
+    placaSeleccionada = "";
+    placaInput.value = "";
+    selloInput.value = "";
+    suggestionsBox.innerHTML = "";
+    selloBox.classList.remove("active");
+    placaInput.focus(); // Regresa el cursor arriba para el siguiente carro
+  }
+
+  function eliminarRegistro(index) {
+    registros.splice(index, 1);
+    guardarEnMemoria();
+    renderLista();
+  }
+
+  function guardarEnMemoria() {
+    localStorage.setItem("planilla_sellos_v1", JSON.stringify(registros));
+  }
+
+  function renderLista() {
+    counter.textContent = `${registros.length} ${registros.length === 1 ? 'vehículo' : 'vehículos'}`;
+
+    if (registros.length === 0) {
+      listaRegistros.innerHTML = `<p style="color: #9ca3af; font-size: 0.9rem; margin: 8px 0;">Aún no hay vehículos registrados en este turno.</p>`;
+      return;
+    }
+
+    listaRegistros.innerHTML = "";
+    registros.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "list-item";
+      div.innerHTML = `
+        <div class="item-info">
+          <span>${index + 1}.</span>
+          <strong>${item.placa}</strong>
+          <span class="item-sello">(${item.sello})</span>
         </div>
+        <button class="btn-del" onclick="eliminarRegistro(${index})">X</button>
+      `;
+      listaRegistros.appendChild(div);
+    });
+  }
 
-        <!-- PESTAÑAS DE NAVEGACIÓN GRANDES CON NÚMEROS EXPLÍCITOS -->
-        <nav class="flex flex-col sm:flex-row border-b-2 border-slate-800 bg-slate-200 p-2 gap-2">
-            <button id="tabBtnPlanilla" onclick="app.switchTab('planilla')" class="flex-1 py-3 px-4 font-black text-sm sm:text-base rounded border-2 border-slate-800 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-pen-to-square text-lg"></i>
-                <span>1. PLANILLA DEL TURNO</span>
-            </button>
-            <button id="tabBtnFleets" onclick="app.switchTab('fleets')" class="flex-1 py-3 px-4 font-black text-sm sm:text-base rounded border-2 border-slate-800 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-truck text-lg"></i>
-                <span>2. VEHÍCULOS GUARDADOS</span>
-                <span id="fleetCountBadge" class="bg-slate-900 text-white text-xs px-2 py-0.5 rounded-full font-paper-mono">0</span>
-            </button>
-            <button id="tabBtnReport" onclick="app.switchTab('report')" class="flex-1 py-3 px-4 font-black text-sm sm:text-base rounded border-2 border-slate-800 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-share-nodes text-lg"></i>
-                <span>3. COPIAR / DESCARGAR</span>
-            </button>
-        </nav>
+  function copiarPlanilla() {
+    if (registros.length === 0) {
+      mostrarToast("La lista está vacía");
+      return;
+    }
 
-        <!-- SECCIÓN DE CONTENIDO PRINCIPAL -->
-        <div class="p-3 sm:p-5 flex-1 bg-white">
+    const hoy = new Date().toLocaleDateString('es-CO');
+    let texto = `Planilla de Carga ${hoy}\n\n`;
+    
+    registros.forEach((item, index) => {
+      texto += `${index + 1}. ${item.placa} (${item.sello})\n`;
+    });
 
-            <!-- PESTAÑA 1: PLANILLA DEL TURNO -->
-            <section id="tabPlanilla" class="space-y-6">
-                
-                <!-- CASILLA DE ANOTACIÓN / FORMULARIO DE INGRESO -->
-                <div class="bg-amber-50/50 border-2 border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm space-y-4">
-                    <div class="flex items-center justify-between border-b-2 border-slate-800 pb-2">
-                        <h2 class="font-black text-base sm:text-lg text-slate-900 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-square-plus text-emerald-700 text-xl"></i> CASILLA DE REGISTRO - NUEVO VEHÍCULO
-                        </h2>
-                        <span class="bg-slate-900 text-white font-paper-mono font-bold text-xs sm:text-sm px-3 py-1 rounded">
-                            TURNO N° <span id="nextPosBadge" class="text-amber-300">1</span>
-                        </span>
-                    </div>
+    texto += `\nCorreo: serpahermides@gmail.com\nTeléfono: 3145882258`;
 
-                    <form id="entryForm" onsubmit="app.handleAddEntry(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            
-                            <!-- Placa con sugerencias grandes -->
-                            <div class="relative">
-                                <label class="block text-xs font-black uppercase text-slate-800 mb-1">
-                                    PLACA DEL VEHÍCULO <span class="text-red-600">*</span>
-                                </label>
-                                <input type="text" id="entryPlate" placeholder="EJ: WHL482" autocomplete="off" required
-                                       oninput="app.handlePlateInput(this.value)"
-                                       class="w-full bg-white border-2 border-slate-800 rounded p-2.5 text-slate-900 font-paper-mono font-black tracking-wider uppercase text-lg focus:outline-none focus:ring-2 focus:ring-slate-900">
-                                
-                                <!-- Desplegable de autocompletado claro -->
-                                <div id="plateSuggestions" class="hidden absolute z-30 top-full left-0 right-0 mt-1 bg-white border-2 border-slate-900 rounded-md shadow-2xl max-h-60 overflow-y-auto divide-y-2 divide-slate-200"></div>
-                            </div>
+    navigator.clipboard.writeText(texto).then(() => {
+      mostrarToast("¡Planilla copiada lista para pegar!");
+    });
+  }
 
-                            <!-- Empresa / Flota -->
-                            <div>
-                                <label class="block text-xs font-black uppercase text-slate-800 mb-1">EMPRESA / FLOTA</label>
-                                <input type="text" id="entryCompany" placeholder="Nombre de la empresa"
-                                       class="w-full bg-white border-2 border-slate-800 rounded p-2.5 text-slate-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-slate-900">
-                            </div>
+  function limpiarTodo() {
+    if (registros.length === 0) return;
+    if (confirm("¿Seguro que deseas borrar toda la lista para iniciar un turno nuevo?")) {
+      registros = [];
+      guardarEnMemoria();
+      renderLista();
+      resetSearch();
+      mostrarToast("Turno reiniciado");
+    }
+  }
 
-                            <!-- Conductor -->
-                            <div>
-                                <label class="block text-xs font-black uppercase text-slate-800 mb-1">NOMBRE DEL CONDUCTOR</label>
-                                <input type="text" id="entryDriver" placeholder="Nombre del conductor"
-                                       class="w-full bg-white border-2 border-slate-800 rounded p-2.5 text-slate-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-slate-900">
-                            </div>
+  function mostrarToast(msg) {
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2200);
+  }
+</script>
 
-                            <!-- Auxiliar -->
-                            <div>
-                                <label class="block text-xs font-black uppercase text-slate-800 mb-1">NOMBRE DEL AUXILIAR</label>
-                                <input type="text" id="entryAux" placeholder="Nombre del auxiliar"
-                                       class="w-full bg-white border-2 border-slate-800 rounded p-2.5 text-slate-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-slate-900">
-                            </div>
-                        </div>
-
-                        <!-- Sección de Sellos y Novedades -->
-                        <div class="pt-3 border-t-2 border-slate-800">
-                            <label class="block text-xs font-black uppercase text-slate-800 mb-1">CÓDIGO DE SELLO O ESTADO/NOVEDAD</label>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div class="sm:col-span-1">
-                                    <input type="text" id="entrySeal" placeholder="Ej: SL-889021 o SIN SELLO"
-                                           class="w-full bg-white border-2 border-slate-800 rounded p-2.5 text-slate-900 font-paper-mono font-bold text-base focus:outline-none focus:ring-2 focus:ring-slate-900">
-                                </div>
-
-                                <!-- Botones de acceso rápido tipo sello -->
-                                <div class="sm:col-span-2 flex flex-wrap gap-2 items-center">
-                                    <button type="button" onclick="app.setSealChip('SIN SELLO')" class="px-3 py-2 bg-amber-200 hover:bg-amber-300 text-slate-900 border-2 border-slate-900 rounded font-black text-xs uppercase transition">
-                                        ⚠️ SIN SELLO
-                                    </button>
-                                    <button type="button" onclick="app.setSealChip('NO CARGÓ')" class="px-3 py-2 bg-rose-200 hover:bg-rose-300 text-slate-900 border-2 border-slate-900 rounded font-black text-xs uppercase transition">
-                                        ❌ NO CARGÓ
-                                    </button>
-                                    <button type="button" onclick="app.setSealChip('FALLA TÉCNICA')" class="px-3 py-2 bg-orange-200 hover:bg-orange-300 text-slate-900 border-2 border-slate-900 rounded font-black text-xs uppercase transition">
-                                        🔧 FALLA TÉCNICA
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botones de Acción del Formulario -->
-                        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                            <label class="flex items-center gap-2 cursor-pointer select-none bg-white px-3 py-2 rounded border-2 border-slate-800">
-                                <input type="checkbox" id="saveToFleetCheck" checked class="w-5 h-5 accent-slate-900 cursor-pointer">
-                                <span class="text-xs font-bold uppercase text-slate-800">Guardar este vehículo en la lista de la empresa</span>
-                            </label>
-
-                            <button type="submit" class="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-black px-6 py-3 rounded-lg border-2 border-slate-900 text-base transition shadow-md flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-plus-circle text-xl"></i> + ANOTAR EN LA PLANILLA
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- RENGLONES DE LA PLANILLA (LISTA EN FORMATO CUADERNO) -->
-                <div class="space-y-3">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b-2 border-slate-900 pb-2">
-                        <h3 class="font-black text-base text-slate-900 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-list-ol text-slate-800"></i> VEHÍCULOS ANOTADOS EN EL TURNO ACTIVO
-                        </h3>
-                        <div class="w-full sm:w-64">
-                            <input type="text" id="sheetSearchInput" oninput="app.filterActiveSheet(this.value)" placeholder="🔍 Buscar en la planilla..."
-                                   class="w-full bg-white border-2 border-slate-800 rounded px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none">
-                        </div>
-                    </div>
-
-                    <!-- Lista Dinámica de Renglones -->
-                    <div id="activeSheetList" class="space-y-3">
-                        <!-- Se renderizan los renglones aquí -->
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- PESTAÑA 2: BASE DE FLOTAS -->
-            <section id="tabFleets" class="hidden space-y-6">
-                
-                <div class="bg-slate-100 border-2 border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <h2 class="font-black text-base text-slate-900 uppercase flex items-center gap-2">
-                            <i class="fa-solid fa-database text-slate-800"></i> BASE DE DATOS DE VEHÍCULOS HABITUALES
-                        </h2>
-                        <p class="text-xs font-bold text-slate-600">Vehículos guardados para autocompletar al digitar la placa.</p>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                        <button onclick="app.openFleetModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-black px-3 py-2 rounded border-2 border-slate-900 text-xs uppercase">
-                            + AGREGAR VEHÍCULO
-                        </button>
-                        <button onclick="app.triggerImportFleet()" class="bg-white hover:bg-slate-100 text-slate-900 font-black px-3 py-2 rounded border-2 border-slate-900 text-xs uppercase">
-                            📥 IMPORTAR CSV
-                        </button>
-                        <input type="file" id="importFileInput" accept=".csv, .json" onchange="app.handleFleetImportFile(event)" class="hidden">
-                        <button onclick="app.exportFleetJSON()" class="bg-white hover:bg-slate-100 text-slate-900 font-black px-3 py-2 rounded border-2 border-slate-900 text-xs uppercase">
-                            📤 RESPALDAR JSON
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tabla estilo cuaderno con bordes visibles -->
-                <div class="border-2 border-slate-900 rounded-lg overflow-hidden">
-                    <div class="p-2 bg-slate-200 border-b-2 border-slate-900 flex justify-between items-center">
-                        <input type="text" id="fleetSearchInput" oninput="app.filterFleetTable(this.value)" placeholder="🔍 Buscar por placa, empresa o conductor..."
-                               class="bg-white border-2 border-slate-800 rounded px-3 py-1.5 text-xs font-bold w-full sm:w-72">
-                        <button onclick="app.loadDemoFleetData()" class="text-xs font-bold text-slate-700 underline hover:text-slate-900 ml-2">
-                            Cargar Datos Ejemplo
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs sm:text-sm">
-                            <thead class="bg-slate-800 text-white font-black uppercase text-xs border-b-2 border-slate-900">
-                                <tr>
-                                    <th class="p-3">PLACA</th>
-                                    <th class="p-3">EMPRESA / FLOTA</th>
-                                    <th class="p-3">CONDUCTOR HABITUAL</th>
-                                    <th class="p-3">AUXILIAR HABITUAL</th>
-                                    <th class="p-3 text-right">ACCIONES</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fleetTableBody" class="divide-y-2 divide-slate-300 font-bold bg-white">
-                                <!-- Filas dinámicas -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- PESTAÑA 3: COPIAR / DESCARGAR REPORTE -->
-            <section id="tabReport" class="hidden space-y-6">
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Opciones de Salida -->
-                    <div class="lg:col-span-1 space-y-4">
-                        <div class="bg-amber-50/60 bord 
+</body>
+</html>
